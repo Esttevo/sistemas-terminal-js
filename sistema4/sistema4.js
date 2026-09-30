@@ -10,33 +10,34 @@ const cardapio = [
 
 let listaPedidos = new Array();
 
+let idPedido = new Number();
+
 do {
     console.log("\n=== MENU ===");
-    console.log("1 - Cadastrar livro");
-    console.log("2 - Listar todos os livros");
-    console.log("3 - Listar livros disponíveis");
-    console.log("4 - Buscar livro pelo título");
-    console.log("5 - Emprestar livro");
-    console.log("6 - Devolver livro");
+    console.log("1 - Cardapio");
+    console.log("2 - Fazer epedido");
+    console.log("3 - Ver todos os pedidos");
+    console.log("4 - Buscar Pedido pelo numero");
+    console.log("5 - mostrar faturamento total");
     console.log("0 - Sair");
     
     opcao = Number(prompt("Escolha uma opção: "));
     
     switch (opcao) {
         case 1:
-            registerLivro();
+            showMenu();
             break;
         case 2:
-            listAllLivros();
+            createPedido();
             break;
         case 3:
-            listAllAvailable();
+            listPedidos();
             break;
         case 4:
-            console.log(searchByName());
+            searchPedidoById();
             break;
         case 5: 
-            borrowLivro();
+            faturamentoTotal()
             break;
         case 6: 
             returnLivro();
@@ -56,46 +57,87 @@ Produto: ${cardapio.nome}`)
     })
 }
 
-function criarPedido() {
 
-}
-
-function Pedido(nomeCliente, produto, quantidade) {
+function Pedido(idPedido, nomeCliente, listaItens, quantidade) {
+    this.idPedido = idPedido;
     this.nomeCliente = nomeCliente;
-    this.produto = produto;
+    this.listaItens = listaItens;
     this.quantidade = quantidade;
 }
 
 function createPedido() {
-    let nomeCliente = prompt("client name");
+    let nomeCliente = prompt("client name: ");
 
     let listaItens = new Array();
+    let listaQuantidadeItens = new Array();
 
     let opc;
     do {
-        showMenu();
-       console.log("1 - adicionar mais itens") 
-       console.log("0 - Sair") 
+        console.log("1 - adicionar item");
+        console.log("0 - Sair")
+        opc = Number(prompt("digite: "));
 
-       opc = prompt("digite");
+        if(opc == 0 && listaItens.length == 0) {
+            throw "lista vazia papa"
+        }
 
        switch (opc) {
             case 1: 
-                let produto = listaPedidos.filter(produto => produto.codigo = prompt("write the product code"));
-                listaItens.push(produto);
+                let codigo = prompt("write the product code : ");
+                let produtoFind = cardapio.find(produto => produto.codigo == codigo);
+                
+                
+                let quantidade = prompt("quantity: ");
+
+                let listaProdutoEQuantidade = {
+                    produto: {...produtoFind},
+                    quantidade: quantidade
+                };
+
+                listaItens.push(listaProdutoEQuantidade);
+
+                listaQuantidadeItens.push(quantidade);
                 break;
             case 0:
                 break;
         }
+        
     } while (opc != 0)
 
-    let quantidade = prompt("quantity:");
 
-    listaPedidos.push(new Pedido(nomeCliente, produto, quantidade));
+    listaPedidos.push(new Pedido(++idPedido, nomeCliente, listaItens, listaQuantidadeItens));
 }
 
 function listPedidos() {
-    listaPedidos.forEach(pedido => console.log(`Cliente: ${pedido.nome}
-Produtos: ${produto.}`))
+    listaPedidos.forEach(pedido => {
+        console.log();
+        console.log(`Id Pedido: ${pedido.idPedido}`);
+        console.log(`Cliente: ${pedido.nomeCliente}`);
+        pedido.listaItens.forEach((item) => {
+            console.log(`${item.produto.nome} : X-${item.quantidade} R$${item.produto.preco}`);
+        })
+    
+    })
+};
+
+function searchPedidoById() {
+    let idPedido = Number(prompt("digite o id do pedido: ")); 
+    let pedido = listaPedidos.find(pedido => pedido.idPedido === idPedido);
+
+    console.log();
+    console.log(`Id Pedido: ${pedido.idPedido}`);
+    console.log(`Cliente: ${pedido.nomeCliente}`);
+    pedido.listaItens.forEach((item) => {
+        console.log(`${item.produto.nome} : X-${item.quantidade} R$${item.produto.preco}`);
+    })
 }
+
+function faturamentoTotal() {
+    let total = listaPedidos.map((pedido => pedido.listaItens.map((lista) => lista.produto.preco * lista.quantidade).reduce((total, preco)=> 
+        total += preco, 0))).reduce((total, lista) => total += lista, 0);
+
+    console.log(total);
+}
+
+
 
